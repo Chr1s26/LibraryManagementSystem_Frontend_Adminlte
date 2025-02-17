@@ -1,10 +1,13 @@
 <template>
+
   <content-header title="User Profile"></content-header>
+
   <common-content>
     <div class="col-md-3">
-      <!-- Profile Image -->
+      
       <div class="card card-primary card-outline">
         <div class="card-body box-profile">
+
           <div class="text-center">
             <img
               class="profile-user-img img-fluid img-circle"
@@ -29,9 +32,10 @@
             </li>
           </ul>
 
-          <a href="#" class="btn btn-primary btn-block"><b>Follow</b></a>
+          <router-link :to="`/users/edit/${user?.id}`" class="btn btn-primary btn-block"><b>Edit</b></router-link>
+          <button type="button" class="btn btn-block btn-danger" @click="deleteUserAction">Delete</button>
         </div>
-        <!-- /.card-body -->
+        
       </div>
     </div>
   </common-content>
@@ -42,11 +46,22 @@
 <script>
 import axios from "axios";
 import { onMounted, ref } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+import ContentHeader from '@/components/ContentHeader.vue';  
+import CommonContent from '@/components/CommonContent.vue';
 
     export default{
-        setup(){
+
+      components: {
+        ContentHeader, 
+        CommonContent  
+      },
+
+      setup(){
             const route = useRoute();
+
+            const router = useRouter();
+
             const user = ref({
                 id : null,
                 username : '',
@@ -59,12 +74,18 @@ import { useRoute } from "vue-router";
             const fetchUsersById = async () => {
                 const userId= route.params.id;
                 const response = await axios.get(`http://localhost:8080/api/users/${userId}`)
-                console.log(response.data)
                 user.value = response.data
             };
 
+            const deleteUserAction = async () => {
+              if(confirm("Are you sure you want to delete this user?")){
+                await axios.delete(`http://localhost:8080/api/users/${user.value.id}`)
+                alert("User deleted successfully!!")
+                router.push("/users");}
+            };
+
             onMounted(fetchUsersById);
-            return {user};
-        }
+            return {user,deleteUserAction};
+      }
     }
 </script>
